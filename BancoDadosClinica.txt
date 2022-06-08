@@ -1,0 +1,82 @@
+create database clinica;
+use clinica;
+
+create table paciente(
+cpf char(11) primary key,
+nome varchar(100) not null,
+idade int
+);
+
+create table medico(
+crm char(11) primary key, 
+nome varchar(100) not null,
+especialidade varchar(100)
+);
+
+create table prontuario(
+codigo_prontuario int primary key auto_increment,
+dados_gerais varchar (1000),
+crm_medico char(11),
+cpf_paciente char(11),
+foreign key (crm_medico) references medico(crm),
+foreign key (cpf_paciente) references paciente(cpf)
+);
+
+create table usuario(
+login char(11) not null primary key,
+senha varchar(20),
+tipo varchar(50)
+);
+
+desc medico;
+alter table medico add cpf char(11) not null;
+show tables;
+alter table medico add foreign key(cpf) references usuario(login);
+alter table paciente add foreign key(cpf) references usuario(login);
+
+desc paciente;
+desc medico;
+desc prontuario;
+desc usuario;
+
+insert into usuario values 
+('12345678901', '123', 'medico'),
+('23456789120', '214', 'medico'),
+('85478512369', '223', 'paciente'),
+('85478512236', '558', 'paciente');
+
+insert into medico values
+('1234', 'José da Silva', 'Clínico Geral', '12345678901'),
+('2547', 'Maria Ângela', 'Pediatra', '23456789120');
+
+insert into paciente values
+('85478512369', 'Fernando', 34),
+('85478512236', 'Aline Ferreira', 10);
+
+insert into prontuario(dados_gerais, cpf_paciente, crm_medico) values
+('O paciente se encontra com a garganta inflamada ', '85478512369', '1234'),
+('A pacienre se encontra com o braço quebrado.', '85478512236', '2547');
+
+select * from prontuario;
+select * from usuario;
+select * from medico;
+select * from paciente;
+
+select prontuario.dados_gerais, medico.nome, medico.especialidade, paciente.cpf, paciente.nome, paciente.idade from prontuario 
+inner join medico on medico.crm=prontuario.crm_medico
+inner join paciente on paciente.cpf=prontuario.cpf_paciente 
+where paciente.cpf=(select login from usuario where login='85478512369' and senha='223');
+
+alter table prontuario add data date;
+alter table prontuario add horario time;
+
+update prontuario set data=curdate(), horario=curtime() where codigo_prontuario in (3, 4, 5); /*curtime é um metodo para pegar a hora atual e curdate pega a data*/
+
+select * from prontuario 
+inner join medico on medico.crm=prontuario.crm_medico
+inner join paciente on paciente.cpf=prontuario.cpf_paciente;
+
+select prontuario.dados_gerais, medico.nome, medico.especialidade, paciente.cpf, paciente.nome, paciente.idade from prontuario 
+inner join medico on medico.crm=prontuario.crm_medico
+inner join paciente on paciente.cpf=prontuario.cpf_paciente 
+where medico.cpf=(select login from usuario where login='12345678901' and senha='123');
